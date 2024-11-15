@@ -1,17 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-enum SimulateState
-{
-    None,
-    Sleeping,
-    Simulating,
-}
+using XPhysic;
 
 public class SpringMover : MonoBehaviour
 {
-    public Vector3 balanceOffset = Vector3.zero;
+    public Vector3 balanceOffset = new Vector3(0, 0.5f, 0);
     public float sprintFK = 1.0f;
     public float time_interval=0.02f;
     public float m = 0.1f;
@@ -32,7 +26,6 @@ public class SpringMover : MonoBehaviour
     void Start()
     {
         Init();
-        Update_a1();
     }
 
     // Update is called once per frame

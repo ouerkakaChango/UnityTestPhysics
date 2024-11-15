@@ -1,0 +1,51 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel AddFBySpring
+#pragma kernel UpdateV1
+#pragma kernel UpdateR1
+#include "XPhysicCommonDef.hlsl"
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result4;
+
+Texture2D<float4> balancePosRT;
+Texture2D<float4> r0RT;
+Texture2D<float4> FaRT;
+Texture2D<float4> v0RT;
+float springFK;
+float dampFK;
+[numthreads(8,8,1)]
+void AddFBySpring(uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+    
+    float3 F = FaRT[id.xy].xyz + 
+    (balancePosRT[id.xy].xyz - r0RT[id.xy].xyz) * springFK*0
+    - v0RT[id.xy].xyz * dampFK*0;
+    Result4[id.xy] = float4(F,0);
+}
+
+Texture2D<float4> FbRT;
+float m;
+float dt;
+[numthreads(8, 8, 1)]
+void UpdateV1(uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+    float3 a = FbRT[id.xy].xyz / m;
+    float3 v1 = v0RT[id.xy].xyz*0 + dt * a*0;
+    Result4[id.xy] = float4(v1, 0);
+}
+
+Texture2D<float4> v1RT;
+RWStructuredBuffer<float3> posBuffer;
+[numthreads(8, 8, 1)]
+void UpdateR1(uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+    float3 r = dt * v1RT[id.xy].xyz + r0RT[id.xy].xyz;
+    uint2 size = GetSize(Result4);
+    uint inx = GetIDFromIxy(id.xy, size);
+    posBuffer[inx] = r ;
+    Result4[id.xy] = float4(r, 0);
+}

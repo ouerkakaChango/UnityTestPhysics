@@ -1,0 +1,35 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel Zero4
+#pragma kernel InitR
+#pragma kernel Copy4
+
+#include "XPhysicCommonDef.hlsl"
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result4;
+
+[numthreads(8,8,1)]
+void Zero4 (uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+
+    Result4[id.xy] = float4(0, 0, 0, 0);
+}
+
+StructuredBuffer<float3> posBuffer;
+[numthreads(8, 8, 1)]
+void InitR(uint3 id : SV_DispatchThreadID)
+{
+    uint2 size = GetSize(Result4);
+    uint inx = GetIDFromIxy(id.xy, size);
+    float3 pos = posBuffer[inx];
+    Result4[id.xy] = float4(pos, 0);
+}
+
+Texture2D<float4> copyFromTex;
+[numthreads(8, 8, 1)]
+void Copy4(uint3 id : SV_DispatchThreadID)
+{
+    Result4[id.xy] = copyFromTex[id.xy];
+}
