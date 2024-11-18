@@ -1,4 +1,4 @@
-Shader "Unlit/UpdateR1"
+Shader "Unlit/AddTex"
 {
     Properties
     {
@@ -32,10 +32,11 @@ Shader "Unlit/UpdateR1"
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
-            sampler2D _v1Tex;
-            float4 _v1Tex_ST;
+            sampler2D _addedTex;
+            float4 _addedTex_ST;
 
-            float dt;
+            float springFK;
+            float spreadK;
 
             v2f vert (appdata v)
             {
@@ -47,10 +48,10 @@ Shader "Unlit/UpdateR1"
 
             float4 frag (v2f i) : SV_Target
             {
-                float3 r0 = tex2D(_MainTex, i.uv).xyz;
-                float3 v1 = tex2D(_v1Tex, i.uv).xyz;
-                float3 r1 = dt * v1 + r0;
-                return float4(r1,0);
+                float3 va = tex2D(_MainTex, i.uv).xyz;
+                float3 vb = tex2D(_addedTex, i.uv).xyz;
+                
+                return float4(va+vb,0);
             }
             ENDCG
         }

@@ -1,4 +1,4 @@
-Shader "Unlit/UpdateR1"
+Shader "Unlit/SpreadOnceUpdateImp"
 {
     Properties
     {
@@ -31,11 +31,7 @@ Shader "Unlit/UpdateR1"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
-
-            sampler2D _v1Tex;
-            float4 _v1Tex_ST;
-
-            float dt;
+            float4 _MainTex_TexelSize;
 
             v2f vert (appdata v)
             {
@@ -45,12 +41,27 @@ Shader "Unlit/UpdateR1"
                 return o;
             }
 
-            float4 frag (v2f i) : SV_Target
+            float frag (v2f i) : SV_Target
             {
-                float3 r0 = tex2D(_MainTex, i.uv).xyz;
-                float3 v1 = tex2D(_v1Tex, i.uv).xyz;
-                float3 r1 = dt * v1 + r0;
-                return float4(r1,0);
+                float impID = tex2D(_MainTex, i.uv).r;
+                //Ö»¼ì²é0µÄimp
+                if(impID>0.5)
+                {
+                    return 1;
+                }
+                float sum=0;
+
+                float2 spreadUVDirs[4]={float2(1,0),float2(-1,0),float2(0,1),float2(0,-1)};
+
+                for(int iter=0;iter<4;iter++)
+                {
+                    float2 uv_neighbour = i.uv+spreadUVDirs[iter]*_MainTex_TexelSize.xy;
+                    uv_neighbour = saturate(uv_neighbour);
+                    float imp_neighbour = tex2D(_MainTex, uv_neighbour).r;
+                    sum+=imp_neighbour;                
+                }
+                
+                return sum>0.5?1:0;
             }
             ENDCG
         }
