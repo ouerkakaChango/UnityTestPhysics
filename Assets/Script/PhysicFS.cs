@@ -15,6 +15,8 @@ public class PhysicFS : MonoBehaviour
     public float m = 0.1f;
     public PhysicGroup group;
 
+    public Vector3 impulse = new Vector3(0, -10, 0);
+
     public Shader shader_AddFBySpring;
     public Shader shader_UpdateV1;
     public Shader shader_UpdateR1;
@@ -200,14 +202,18 @@ public class PhysicFS : MonoBehaviour
         CopyTex(tex_r1, ref tex_r0);
         ZeroTex(ref tex_Fa);
         ZeroTex(ref tex_Fb);
-        //todo
-        //ZeroTex(ref rt_impulse)
     }
 
     void InitFByImpulse()
     {
-        //...
-        //todo
+        var impulseCount = group.GetNowImpulseCount();
+        Color[] colors = new Color[impulseCount.Count];
+        for(int i=0;i<colors.Length;i++)
+        {
+            colors[i] = Vec3ToColor(impulse * impulseCount[i]);
+        }
+        tex_Fb.SetPixels(colors);
+        group.ZeroNowImpulseCount();
     }
 
     void AddFBySpring()
@@ -220,6 +226,11 @@ public class PhysicFS : MonoBehaviour
         mat_AddForceBySpring.SetFloat("dampFK", dampFK);
         Graphics.Blit(tex_Fa, rt, mat_AddForceBySpring);
         CopyTex(rt, ref tex_Fb);
+    }
+
+    static Color Vec3ToColor(Vector3 v)
+    {
+        return new Color(v.x, v.y, v.z, 0);
     }
     //###################################
 
